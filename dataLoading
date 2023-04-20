@@ -3,20 +3,21 @@ import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
-from torchvision.transforms import ToTensor
+from PIL import Image
+import torchvision.transforms as transforms
+import tensorflow as tf
 from torchvision.io import read_image
 
-data = pd.read_csv(r"C:\Users\macke\Downloads\Labelled Data.csv")
-labels = pd.DataFrame(data, columns = ['Binary'])
-imgDirectory = pd.DataFrame(data, columns = ['Image'])
-# WORKS
+dataPath = r"C:\Users\macke\Desktop\450 Dataset"
+labels = os.path.join(dataPath, 'Labelled Data.csv')
+# WORKS, need to change imgDirectory to path to folder
 
-class CustomDataSet(Dataset):
+class CustomDataset(Dataset):
     # identifying
-    def __init__self(self, labels, imgDirectory, transform = None, target_transform = None):
+    def __init__(self, labels, imgDirectory, transform = None, target_transform = None):
         # Initializaation
-        self.labels = labels
-        self.imgDirectory = imgDirectory
+        self.labels =  pd.read_csv(labels)
+        self.imgDirectory = imgDirectory 
         self.transform = transform
         self.target_transform = target_transform
 
@@ -26,52 +27,76 @@ class CustomDataSet(Dataset):
     
     def __getitem__(self, index):
         # Generates one samples of data
-        img_path = os.path.join(self.imgDirectory, self.labels.iloc[index, 0])  # might pose a problem depending on image path in 'data' variable
+        img_path = os.path.join(self.imgDirectory, self.labels.iloc[index, 0]) # error here 
+        # above function works by joining path and image name for location
         image = read_image(img_path)
-        imglabel = self.labels.iloc[index, 1]
+        imglabel = self.labels.iloc[index, 1] # reads second column for designated label
+
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
-            label = self.target_transform(label)
-        return image, label
+            imglabel = self.target_transform(imglabel)
+        return image, imglabel
 
+class Rescale:
+    def __init__(self, sizing = 256):
+        self.sizing = sizing
 
+    def __call__(self, tensor):
+        toPIL = transforms.ToPILImage()(tensor)
+        resized = toPIL.thumbnail((self.sizing, self.sizing))
+        newTen = transforms.ToTensor()(resized)
+        return newTen
+batch_size = 10
 
+initial_dataset = CustomDataset(labels, dataPath, transform=Rescale())
+print(dir(initial_dataset))
+train_dataloader = DataLoader(initial_dataset, batch_size, shuffle = True)
+
+train_features, train_labels = next(iter(train_dataloader))
+print(f"Feature batch shape: {train_features.size()}")
+print(f"Labels batch shape: {train_labels.size()}")
+img = train_features[0].squeeze()
+label = train_labels[0]
+plt.imshow(img, cmap="gray")
+plt.show()
+print(f"Label: {label}")
+'''
+print(initial_dataset[0])
+img, labels = next(iter(initial_dataset))
+image = img[0].squeeze()
+plt.imshow(image, cmap="gray")
+plt.show()
+'''
 
 '''
-training_data = datasets.FashionMNIST(
-    root="location of where data is stored",
-    train=True,
-    transform=ToTensor()
-)
+figure = plt.figure(figsize=(8, 8))
+cols, rows = 3, 3
+for i in range(1, cols * rows + 1):
+    sample_idx = torch.randint(len(training_data), size=(1,)).item()
+    img, label = training_data[sample_idx]
+    figure.add_subplot(rows, cols, i)
+    plt.title(labels_map[label])
+    plt.axis("off")
+    plt.imshow(img.squeeze(), cmap="gray")
+plt.show()
+'''
+'''
+for i in range(len(face_dataset)):
+    sample = face_dataset[i]
 
-test_data = datasets.FashionMNIST(
-    root="location of where data is stored",
-    train=False,
-    transform=ToTensor()
-)
+    print(i, sample['image'].shape, sample['imglabel'].shape)
 
-class CustomImageDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform = None, target_transform = None):
-        self.img_labels = pd.read_csv(annotations_file)
-        self.img_dir = img_dir
-        self.transform = transform
-        self.target_transform = target_transform
+    ax = plt.subplot(1, 4, i + 1)
+    plt.tight_layout()
+    ax.set_title('Sample #{}'.format(i))
+    ax.axis('off')
 
-        def __len__(self):
-            return len(self.img_labels)
-        
-        def __getitem__(self, idx):
-            img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-            image = read_image(img_path)
-            label = self.img_labels.iloc[idx, 1]
-            if self.transform:
-                image = self.transform(image)
-            if self.target_transform:
-                label = self.target_transform(label)
-            return image, label
-
-
+    if i == 3:
+        plt.show()
+        break
+'''
+'''
 train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True) 
 
