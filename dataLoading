@@ -9,9 +9,10 @@ import tensorflow as tf
 from torchvision.io import read_image
 import torchvision
 
-dataPath = r"C:/Users/macke/Desktop/450 Dataset"
-labels = os.path.join(dataPath, 'Labelled Data.csv')
-# WORKS, need to change imgDirectory to path to folder
+tdataPath = r"C:/Users/macke/Desktop/450 Training Dataset" # Change to specific file path for training folder 
+tlabels = os.path.join(tdataPath, 'Labelled Data.csv') # label path for training
+vdataPath = r"C:/Users/macke/Desktop/450 Validation Dataset" # Change to specific file path for validation folder 
+vlabels = os.path.join(vdataPath, 'Labelled Data.csv') # label path for validation
 
 class CustomDataset(Dataset):
     # identifying
@@ -54,7 +55,8 @@ def expand2square(pil_img, background_color):
     
 
 class Rescale:
-    def __init__(self, sizing = 200):
+    def __init__(self, sizing = 200): 
+        # if the sizing value is changed, values in Net() __init__ need to be changed for matrix multiplication
         self.sizing = sizing
 
     def __call__(self, tensor):
@@ -65,15 +67,18 @@ class Rescale:
         newTen = transforms.ToTensor()(resized) # converts back to tensor
         return newTen
 
-labels_map = {
+labels_map = { # can change to more extensive cateogorization if enough time, starting off with binary now
     0: "Not Uncanny",
     1: "Uncanny"
 }
 
 batch_size = 5
 
-initial_dataset = CustomDataset(labels, dataPath, transform=Rescale())
-train_dataloader = DataLoader(initial_dataset, batch_size, shuffle = True)
+train_dataset = CustomDataset(tlabels, tdataPath, transform=Rescale())
+train_dataloader = DataLoader(train_dataset, batch_size, shuffle = True)
+
+valid_dataset = CustomDataset(vlabels, vdataPath, transform=Rescale())
+valid_dataloader = DataLoader(valid_dataset, batch_size, shuffle = True)
 
 train_features, train_labels = next(iter(train_dataloader))
 print(f"Feature batch shape: {train_features.size()}")
@@ -117,7 +122,7 @@ import torch.optim as optim
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-for epoch in range(2):  # loop over the dataset multiple times
+for epoch in range(10):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(train_dataloader, 0):
@@ -148,9 +153,8 @@ torch.save(net.state_dict(), PATH)
 
 correct = 0
 total = 0
-# since we're not training, we don't need to calculate the gradients for our outputs
 with torch.no_grad():
-    for data in train_dataloader: # replace with test data 
+    for data in valid_dataloader: # validation data for testing
         images, labels = data
         # calculate outputs by running images through the network
         outputs = net(images)
@@ -159,4 +163,4 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-print(f'Accuracy of the network on the 200 test images: {100 * correct // total} %')
+print(f'Accuracy of the network on the given test images: {100 * correct // total} %')
