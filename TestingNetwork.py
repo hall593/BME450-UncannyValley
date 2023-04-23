@@ -1,3 +1,4 @@
+
 import torch
 import os
 from torch.utils.data import DataLoader
@@ -30,19 +31,41 @@ total = 0
 correct_pred = {classname: 0 for classname in labels_map}
 total_pred = {classname: 0 for classname in labels_map}
 
+
 with torch.no_grad():
     for data in valid_dataloader: # validation data for testing
+        index = 0 # number of images want to view + prediction
         images, labels = data
         # calculate outputs by running images through the network
         outputs = net(images)
         # the class with the highest energy is what we choose as prediction
         _, predictions = torch.max(outputs.data, 1)
         for label, prediction in zip(labels, predictions):
+            '''
+            if index < 1:
+                test = images[index].permute(1,2,0).numpy() # changes tensor shape to readable image
+                plt.imshow(test.squeeze(), cmap = "gray")
+                Vdictvalue = torch.IntTensor.item(label) # v_labels returns tensor value, convert to int
+                PdictValue = torch.IntTensor.item(prediction)
+                print(f"Label: {[labels_map[Vdictvalue]]}")
+                print(f"Prediction: {[labels_map[PdictValue]]}")
+                plt.show()
+            '''
             if label == prediction:
                 correct_pred[torch.IntTensor.item(label)] += 1
+            else:
+                test = images[index].permute(1,2,0).numpy() # changes tensor shape to readable image
+                plt.imshow(test.squeeze(), cmap = "gray")
+                Vdictvalue = torch.IntTensor.item(label) # v_labels returns tensor value, convert to int
+                PdictValue = torch.IntTensor.item(prediction)
+                print(f"Label: {[labels_map[Vdictvalue]]}")
+                print(f"Prediction: {[labels_map[PdictValue]]}")
+                plt.show()
             total_pred[torch.IntTensor.item(label)] += 1
+            index += 1
         total += labels.size(0)
         correct += (predictions == labels).sum().item()
+
 
 
 print(f'Accuracy of the network on the given test images: {100 * correct // total} %')
@@ -57,8 +80,4 @@ v_images, v_labels = next(iter(valid_dataloader))
 print(f"Feature batch shape: {v_images.size()}")
 
 # printing out single image + label
-test = v_images[0].permute(1,2,0).numpy() # changes tensor shape to readable image
-plt.imshow(test.squeeze(), cmap = "gray")
-dictvalue = torch.IntTensor.item(v_labels[0]) # v_labels returns tensor value, convert to int
-print(f"Label: {[labels_map[dictvalue]]}")
-plt.show()
+

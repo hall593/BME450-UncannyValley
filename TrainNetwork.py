@@ -104,6 +104,13 @@ import torch.optim as optim
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
+
+# plotting loss with training and validation
+t_loss = {}
+v_loss = {}
+epoch_values = {}
+
+
 for epoch in range(5):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -124,6 +131,7 @@ for epoch in range(5):  # loop over the dataset multiple times
         if i % 5 == 4:    
             # print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
             running_loss = 0.0
+
 
 print('Finished Training')
 
