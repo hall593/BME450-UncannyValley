@@ -7,12 +7,9 @@ from PIL import Image
 import torchvision.transforms as transforms
 import tensorflow as tf
 from torchvision.io import read_image
-import torchvision
 
 tdataPath = r"C:/Users/macke/Desktop/450 Dataset/Training" # Change to specific file path for training folder 
 tlabels = os.path.join(tdataPath, 'Labelled Data.csv') # label path for training
-vdataPath = r"C:/Users/macke/Desktop/450 Dataset/Validation" # Change to specific file path for validation folder 
-vlabels = os.path.join(vdataPath, 'Labelled Data.csv') # label path for validation
 
 class CustomDataset(Dataset):
     # identifying
@@ -67,30 +64,15 @@ class Rescale:
         newTen = transforms.ToTensor()(resized) # converts back to tensor
         return newTen
 
-labels_map = { # can change to more extensive cateogorization if enough time, starting off with binary now
-    0: "Not Uncanny",
-    1: "Uncanny"
-}
 
 batch_size = 5
 
 train_dataset = CustomDataset(tlabels, tdataPath, transform=Rescale())
 train_dataloader = DataLoader(train_dataset, batch_size, shuffle = True)
 
-valid_dataset = CustomDataset(vlabels, vdataPath, transform=Rescale())
-valid_dataloader = DataLoader(valid_dataset, batch_size, shuffle = True)
 
 train_features, train_labels = next(iter(train_dataloader))
 print(f"Feature batch shape: {train_features.size()}")
-
-''' 
-# printing out single image + label
-test = train_features[0].permute(1,2,0).numpy() # changes tensor shape to readable image
-plt.imshow(test.squeeze(), cmap = "gray")
-dictvalue = torch.IntTensor.item(train_labels[0]) # train_labels returns tensor value, convert to int
-print(f"Label: {[labels_map[dictvalue]]}")
-plt.show()
-'''
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -139,8 +121,8 @@ for epoch in range(5):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
-        if i % 5 == 4:    # print every 2000 mini-batches
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
+        if i % 5 == 4:    
+            # print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
             running_loss = 0.0
 
 print('Finished Training')
@@ -150,31 +132,3 @@ print('Finished Training')
 PATH = './cifar_net.pth' 
 torch.save(net.state_dict(), PATH)
 
-# count predictions overall
-correct = 0
-total = 0
-
-# counting predictions for each class
-correct_pred = {classname: 0 for classname in labels_map}
-total_pred = {classname: 0 for classname in labels_map}
-
-with torch.no_grad():
-    for data in valid_dataloader: # validation data for testing
-        images, labels = data
-        # calculate outputs by running images through the network
-        outputs = net(images)
-        # the class with the highest energy is what we choose as prediction
-        _, predictions = torch.max(outputs.data, 1)
-        for label, prediction in zip(labels, predictions):
-            if label == prediction:
-                correct_pred[torch.IntTensor.item(label)] += 1
-            total_pred[torch.IntTensor.item(label)] += 1
-        total += labels.size(0)
-        correct += (predictions == labels).sum().item()
-# the cutoff for uncanny and canny images was decidedly pictures of ur mum
-print(f'Accuracy of the network on the given test images: {100 * correct // total} %')
-
-# print accuracy for each class
-for classname, correct_count in correct_pred.items():
-    accuracy = 100 * float(correct_count) / total_pred[classname]
-    print(f'Accuracy for class: {classname} is {accuracy:.1f} %')
