@@ -1,5 +1,6 @@
 import os
 import torch
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
@@ -106,13 +107,11 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 
 # plotting loss with training and validation
-t_loss = {}
-v_loss = {}
-epoch_values = {}
+t_loss = []
+rounds = []
 
-
-for epoch in range(5):  # loop over the dataset multiple times
-
+counter = 0
+for epoch in range(20):  # loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(train_dataloader, 0):
         # get the inputs; data is a list of [inputs, labels]
@@ -128,13 +127,24 @@ for epoch in range(5):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
+        
+        
+        counter += 1
         if i % 5 == 4:    
-            # print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
+            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
+            t_loss.append(running_loss)
+            rounds.append(counter)
             running_loss = 0.0
 
 
 print('Finished Training')
-
+x = np.array(rounds)
+y = np.array(t_loss)
+plt.plot(x, y, color = 'orange')
+plt.xlabel('Batch')
+plt.ylabel('Loss')
+plt.title('Loss per batch of training')
+plt.show()
 
 # Saving model
 PATH = './cifar_net.pth' 
