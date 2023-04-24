@@ -67,7 +67,7 @@ class Rescale:
         return newTen
 
 
-batch_size = 20
+batch_size = 5 # Change!!!!, batch size seems to actually icnrease accuracy for training, had it at 20 earlier
 
 # Preparaing datasets
 train_dataset = CustomDataset(tlabels, tdataPath, transform=Rescale())
@@ -201,7 +201,7 @@ for epoch in range(num_epoch):
         training_loss.backward()
         # Update Weights
         optimizer.step()
-        
+
         # Calculate Loss
         step_loss.append(training_loss.item())
         if (i+1) % 1 == 0:
