@@ -71,10 +71,6 @@ batch_size = 5
 train_dataset = CustomDataset(tlabels, tdataPath, transform=Rescale())
 train_dataloader = DataLoader(train_dataset, batch_size, shuffle = True)
 
-
-train_features, train_labels = next(iter(train_dataloader))
-print(f"Feature batch shape: {train_features.size()}")
-
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -111,7 +107,7 @@ t_loss = []
 rounds = []
 
 counter = 0
-for epoch in range(20):  # loop over the dataset multiple times
+for epoch in range(10):  # loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(train_dataloader, 0):
         # get the inputs; data is a list of [inputs, labels]
@@ -128,9 +124,8 @@ for epoch in range(20):  # loop over the dataset multiple times
         # print statistics
         running_loss += loss.item()
         
-        
-        counter += 1
-        if i % 5 == 4:    
+        if i % 5 == 4:
+            counter += 1    
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
             t_loss.append(running_loss)
             rounds.append(counter)
@@ -140,10 +135,10 @@ for epoch in range(20):  # loop over the dataset multiple times
 print('Finished Training')
 x = np.array(rounds)
 y = np.array(t_loss)
-plt.plot(x, y, color = 'orange')
-plt.xlabel('Batch')
+plt.plot(x, y)
+plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Loss per batch of training')
+plt.title('Training Loss')
 plt.show()
 
 # Saving model
