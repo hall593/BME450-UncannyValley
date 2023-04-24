@@ -128,8 +128,9 @@ for epoch in range(10):  # loop over the dataset multiple times
             counter += 1    
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 5:.3f}')
             t_loss.append(running_loss)
-            rounds.append(counter)
+
             running_loss = 0.0
+    rounds.append(counter)
 
 
 print('Finished Training')
