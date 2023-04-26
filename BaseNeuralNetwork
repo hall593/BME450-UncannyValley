@@ -263,7 +263,7 @@ for classname, correct_count in correct_pred.items():
 
 x_epochs = list(range(1, num_epoch + 1))
 plt.plot(x_epochs, trainingEpoch_loss, label = "Training Loss")
-plt.plot(x_epochs, validationEpoch_loss, label = "Testing Loss")
+plt.plot(x_epochs, validationEpoch_loss, label = "Validation Loss")
 plt.legend()
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
