@@ -113,7 +113,8 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 # plotting loss with just training, comment out if want to validate
 
-num_epoch = 5
+num_epoch = 20
+
 '''
 t_loss = []
 batch = []
@@ -146,10 +147,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     batch.append(epoch)
     avg = 0
     avg_counter = 0
+
 '''
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 '''
 print('Finished Training')
@@ -161,14 +164,15 @@ plt.xlim([0, num_epoch])
 plt.ylabel('Loss')
 plt.title('Training Loss')
 plt.show()
+
 '''
 
 
-PATH = './cifar_net.pth' 
+PATH = './cifar_net.pth' #Pick path, cifar_net is original network
 # Saving model, uncomment if training
 #torch.save(net.state_dict(), PATH)
 
-# Loading model, uncomment if validating
+# Loading model, uncomment if validating. 
 net.load_state_dict(torch.load(PATH))
 
 labels_map = { # can change to more extensive cateogorization if enough time, starting off with binary now
@@ -228,8 +232,10 @@ for epoch in range(num_epoch):
 
             if label == prediction:
                 correct_pred[torch.IntTensor.item(label)] += 1
+           
             '''
             else:
+                print("Epoch is: ", epoch)
                 test = images[index].permute(1,2,0).numpy() # changes tensor shape to readable image
                 plt.imshow(test.squeeze(), cmap = "gray")
                 Vdictvalue = torch.IntTensor.item(label) # v_labels returns tensor value, convert to int
@@ -237,7 +243,9 @@ for epoch in range(num_epoch):
                 print(f"Label: {[labels_map[Vdictvalue]]}")
                 print(f"Prediction: {[labels_map[PdictValue]]}")
                 plt.show()
-            '''
+            '''  
+               
+            
             total_pred[torch.IntTensor.item(label)] += 1
             index += 1
         total += labels.size(0)
@@ -261,3 +269,5 @@ plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title('Loss per Epoch')
 plt.show()
+
+
