@@ -114,8 +114,9 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 # plotting loss with just training, comment out if want to validate
 
 num_epoch = 20
-
 '''
+# training 
+
 t_loss = []
 batch = []
 
@@ -148,10 +149,12 @@ for epoch in range(num_epoch):  # loop over the dataset multiple times
     avg = 0
     avg_counter = 0
 
-'''
 
+
+'''
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 
 '''
@@ -164,6 +167,7 @@ plt.xlim([0, num_epoch])
 plt.ylabel('Loss')
 plt.title('Training Loss')
 plt.show()
+
 
 '''
 
@@ -232,7 +236,7 @@ for epoch in range(num_epoch):
 
             if label == prediction:
                 correct_pred[torch.IntTensor.item(label)] += 1
-           
+
             '''
             else:
                 print("Epoch is: ", epoch)
